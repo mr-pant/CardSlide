@@ -29,7 +29,7 @@
 {
     [super viewDidLoad];
 
-    [self setFrontViewInFront];
+    [self setFrontViewInFront:YES];
     
     UIPanGestureRecognizer *panGesture = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(handlePanGesture:)];
     
@@ -76,15 +76,15 @@
             NSLog(@"down slide");
             if (_currentFrontView == _viewFront)
             {
-                [self setTopViewInFront];
+                [self setTopViewInFront:NO];
             }
             else if (_currentFrontView == _viewBack)
             {
-                [self setFrontViewInFront];
+                [self setFrontViewInFront:NO];
             }
             else if (_currentFrontView == _viewTop)
             {
-                [self setBackViewInFront];
+                [self setBackViewInFront:NO];
             }
         }
         else if (velocity.y <= 100 && velocity.y >= -100)
@@ -94,15 +94,15 @@
 
             if (_currentFrontView == _viewFront)
             {
-                [self setFrontViewInFront];
+                [self setFrontViewInFront:NO];
             }
             else if (_currentFrontView == _viewBack)
             {
-                [self setBackViewInFront];
+                [self setBackViewInFront:NO];
             }
             else if (_currentFrontView == _viewTop)
             {
-                [self setTopViewInFront];
+                [self setTopViewInFront:NO];
             }
         }
         else if (velocity.y < -100)
@@ -112,15 +112,15 @@
 
             if (_currentFrontView == _viewFront)
             {
-                [self setBackViewInFront];
+                [self setBackViewInFront:YES];
             }
             else if (_currentFrontView == _viewBack)
             {
-                [self setTopViewInFront];
+                [self setTopViewInFront:YES];
             }
             else if (_currentFrontView == _viewTop)
             {
-                [self setFrontViewInFront];
+                [self setFrontViewInFront:YES];
             }
             
         }
@@ -130,13 +130,11 @@
 }
 
 
-- (void)setFrontViewInFront
+- (void)setFrontViewInFront:(BOOL)slideUp
 {
     NSLog(@"setFrontViewInFront");
-//    [_viewBack setHidden:YES];
-//    [_viewFront setHidden:NO];
-//    [_viewTop setHidden:NO];
-    
+
+    if (slideUp) [self.view sendSubviewToBack:_viewBack];
 
     _constTopViewBack.constant = 10;
     _constTopViewFront.constant = 10;
@@ -151,12 +149,12 @@
     _currentFrontView = _viewFront;
 }
 
-- (void)setTopViewInFront
+- (void)setTopViewInFront:(BOOL)slideUp
 {
         NSLog(@"setTopViewInFront");
-//    [_viewBack setHidden:NO];
-//    [_viewFront setHidden:YES];
-//    [_viewTop setHidden:NO];
+
+    if (slideUp) [self.view sendSubviewToBack:_viewFront];
+
     _constTopViewBack.constant = -(_viewBack.frame.size.height + 20);
     _constTopViewFront.constant = 10;
     _constTopViewTop.constant = 10;
@@ -171,12 +169,12 @@
     _currentFrontView = _viewTop;
 }
 
-- (void)setBackViewInFront
+- (void)setBackViewInFront:(BOOL)slideUp
 {
         NSLog(@"setBackViewInFront");
-//    [_viewBack setHidden:NO];
-//    [_viewFront setHidden:NO];
-//    [_viewTop setHidden:YES];
+
+    if (slideUp) [self.view sendSubviewToBack:_viewTop];
+    
     _constTopViewBack.constant = 10;
     _constTopViewFront.constant = -(_viewFront.frame.size.height + 20);
     _constTopViewTop.constant = 10;
