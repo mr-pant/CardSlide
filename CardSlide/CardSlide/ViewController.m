@@ -39,7 +39,6 @@
 
 - (void)handlePanGesture:(UIPanGestureRecognizer *)recognizer
 {
-    
     CGPoint loc = [recognizer locationInView:self.view];
     CGPoint velocity = [recognizer velocityInView:self.view];
     NSLog(@"velocity = %f", velocity.y);
@@ -51,25 +50,42 @@
     {
         CGFloat diff = _startValue - loc.y;
         _startValue = loc.y;
-
         
-        if (_currentFrontView == _viewFront)
+        NSLog(@"diff %f" , diff);
+        
+        if (diff < 1)
         {
-        _constTopViewTop.constant -= diff;
+            if (_currentFrontView == _viewFront)
+            {
+                _constTopViewTop.constant -= diff;
+            }
+            else if (_currentFrontView == _viewBack)
+            {
+                _constTopViewFront.constant -= diff;
+            }
+            else if (_currentFrontView == _viewTop)
+            {
+                _constTopViewBack.constant -= diff;
+            }
         }
-        else if (_currentFrontView == _viewBack)
+        else
         {
-        _constTopViewFront.constant -= diff;
+            if (_currentFrontView == _viewFront)
+            {
+                _constTopViewFront.constant -= diff;
+            }
+            else if (_currentFrontView == _viewBack)
+            {
+                _constTopViewBack.constant -= diff;
+            }
+            else if (_currentFrontView == _viewTop)
+            {
+                _constTopViewTop.constant -= diff;
+            }
         }
-        else if (_currentFrontView == _viewTop)
-        {
-        _constTopViewBack.constant -= diff;
-        }
-
     }
     else if (recognizer.state == UIGestureRecognizerStateEnded)
     {
-        
         if (velocity.y > 100 )
         {
             //down slide
@@ -91,7 +107,7 @@
         {
             //down release
             NSLog(@"down release");
-
+            
             if (_currentFrontView == _viewFront)
             {
                 [self setFrontViewInFront:NO];
@@ -109,7 +125,7 @@
         {
             //up
             NSLog(@"up slide");
-
+            
             if (_currentFrontView == _viewFront)
             {
                 [self setBackViewInFront:YES];
@@ -122,13 +138,9 @@
             {
                 [self setFrontViewInFront:YES];
             }
-            
         }
-        
     }
-    
 }
-
 
 - (void)setFrontViewInFront:(BOOL)slideUp
 {
