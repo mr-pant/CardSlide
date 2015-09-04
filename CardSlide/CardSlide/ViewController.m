@@ -42,7 +42,7 @@
     
     CGPoint loc = [recognizer locationInView:self.view];
     CGPoint velocity = [recognizer velocityInView:self.view];
-//    NSLog(@"velocity = %f %f", velocity.x, velocity.y);
+    NSLog(@"velocity = %f", velocity.y);
     if (recognizer.state == UIGestureRecognizerStateBegan)
     {
         _startValue = loc.y;
@@ -51,50 +51,82 @@
     {
         CGFloat diff = _startValue - loc.y;
         _startValue = loc.y;
+
+        
+        if (_currentFrontView == _viewFront)
+        {
+        _constTopViewTop.constant -= diff;
+        }
+        else if (_currentFrontView == _viewBack)
+        {
+        _constTopViewFront.constant -= diff;
+        }
+        else if (_currentFrontView == _viewTop)
+        {
         _constTopViewBack.constant -= diff;
+        }
+
     }
     else if (recognizer.state == UIGestureRecognizerStateEnded)
     {
-     
+        
         if (velocity.y > 100 )
         {
-            //down
+            //down slide
+            NSLog(@"down slide");
             if (_currentFrontView == _viewFront)
             {
                 [self setTopViewInFront];
-                
             }
             else if (_currentFrontView == _viewBack)
-                {
-                    [self setFrontViewInFront];
-                }
+            {
+                [self setFrontViewInFront];
+            }
             else if (_currentFrontView == _viewTop)
-                {
-                    [self setBackViewInFront];
-                }
-            
+            {
+                [self setBackViewInFront];
+            }
+        }
+        else if (velocity.y <= 100 && velocity.y >= -100)
+        {
+            //down release
+            NSLog(@"down release");
+
+            if (_currentFrontView == _viewFront)
+            {
+                [self setFrontViewInFront];
+            }
+            else if (_currentFrontView == _viewBack)
+            {
+                [self setBackViewInFront];
+            }
+            else if (_currentFrontView == _viewTop)
+            {
+                [self setTopViewInFront];
+            }
+        }
+        else if (velocity.y < -100)
+        {
+            //up
+            NSLog(@"up slide");
+
+            if (_currentFrontView == _viewFront)
+            {
+                [self setBackViewInFront];
+            }
+            else if (_currentFrontView == _viewBack)
+            {
+                [self setTopViewInFront];
+            }
+            else if (_currentFrontView == _viewTop)
+            {
+                [self setFrontViewInFront];
+            }
             
         }
-        else if (velocity.y < 100)
-            {
-
-                if (_currentFrontView == _viewFront)
-                {
-                    [self setBackViewInFront];
-                }
-                else if (_currentFrontView == _viewBack)
-                {
-                    [self setTopViewInFront];
-                }
-                else if (_currentFrontView == _viewTop)
-                {
-                    [self setFrontViewInFront];
-                }
-
-            }
         
     }
-
+    
 }
 
 
@@ -105,13 +137,16 @@
 //    [_viewFront setHidden:NO];
 //    [_viewTop setHidden:NO];
     
+
     _constTopViewBack.constant = 10;
     _constTopViewFront.constant = 10;
-    _constTopViewTop.constant -= _viewTop.frame.size.height;
+    _constTopViewTop.constant = -(_viewTop.frame.size.height + 20);
     
     [UIView animateWithDuration:0.5
                      animations:^{
                          [self.view layoutIfNeeded];
+                     } completion:^(BOOL finished) {
+                         [self.view bringSubviewToFront:_viewTop];
                      }];
     _currentFrontView = _viewFront;
 }
@@ -119,17 +154,19 @@
 - (void)setTopViewInFront
 {
         NSLog(@"setTopViewInFront");
-    [_viewBack setHidden:NO];
-    [_viewFront setHidden:YES];
-    [_viewTop setHidden:NO];
-
-    _constTopViewBack.constant -= _viewBack.frame.size.height;
+//    [_viewBack setHidden:NO];
+//    [_viewFront setHidden:YES];
+//    [_viewTop setHidden:NO];
+    _constTopViewBack.constant = -(_viewBack.frame.size.height + 20);
     _constTopViewFront.constant = 10;
     _constTopViewTop.constant = 10;
 
     [UIView animateWithDuration:0.5
                      animations:^{
                          [self.view layoutIfNeeded];
+                     } completion:^(BOOL finished) {
+                         [self.view bringSubviewToFront:_viewBack];
+                         
                      }];
     _currentFrontView = _viewTop;
 }
@@ -137,17 +174,19 @@
 - (void)setBackViewInFront
 {
         NSLog(@"setBackViewInFront");
-    [_viewBack setHidden:NO];
-    [_viewFront setHidden:NO];
-    [_viewTop setHidden:YES];
-
+//    [_viewBack setHidden:NO];
+//    [_viewFront setHidden:NO];
+//    [_viewTop setHidden:YES];
     _constTopViewBack.constant = 10;
-    _constTopViewFront.constant -= _viewFront.frame.size.height;
+    _constTopViewFront.constant = -(_viewFront.frame.size.height + 20);
     _constTopViewTop.constant = 10;
 
     [UIView animateWithDuration:0.5
                      animations:^{
                          [self.view layoutIfNeeded];
+                     } completion:^(BOOL finished) {
+                         [self.view bringSubviewToFront:_viewFront];
+                         
                      }];
     _currentFrontView = _viewBack;
 }
