@@ -9,16 +9,18 @@
 #import "ViewController.h"
 #import "CardView.h"
 
+#define SPEED_LIMIT         170
+#define ANIMATION_DURATION  0.4
+
 @interface ViewController ()
 
 @property (weak, nonatomic) IBOutlet NSLayoutConstraint *constTopViewTop;
 @property (weak, nonatomic) IBOutlet NSLayoutConstraint *constTopViewBack;
 @property (weak, nonatomic) IBOutlet NSLayoutConstraint *constTopViewFront;
-@property (weak, nonatomic) IBOutlet CardView           *viewTop;
-@property (weak, nonatomic) IBOutlet CardView           *viewFront;
-@property (weak, nonatomic) IBOutlet CardView           *viewBack;
-@property (weak, nonatomic) CardView                    *currentFrontView;
-
+@property (nonatomic) CardView                          *viewTop;
+@property (nonatomic) CardView                          *viewFront;
+@property (nonatomic) CardView                          *viewBack;
+@property (nonatomic) NSMutableDictionary               *dictCardView;
 @property (nonatomic) CGFloat startValue;
 
 @end
@@ -29,12 +31,28 @@
 {
     [super viewDidLoad];
 
-    [self setFrontViewInFront:YES];
+    _viewTop = (CardView *)[self.view viewWithTag:POSITION_TOP];
+    _viewFront = (CardView *)[self.view viewWithTag:POSITION_FRONT];
+    _viewBack = (CardView *)[self.view viewWithTag:POSITION_BACK];
+    
+    [_viewTop setPosition:POSITION_TOP];
+    [_viewFront setPosition:POSITION_FRONT];
+    [_viewBack setPosition:POSITION_BACK];
+    
+    _dictCardView = [NSMutableDictionary dictionaryWithCapacity:3];
+    [_dictCardView setObject:_constTopViewTop forKey:[NSNumber numberWithInt:POSITION_TOP]];
+    [_dictCardView setObject:_constTopViewFront forKey:[NSNumber numberWithInt:POSITION_FRONT]];
+    [_dictCardView setObject:_constTopViewBack forKey:[NSNumber numberWithInt:POSITION_BACK]];
     
     UIPanGestureRecognizer *panGesture = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(handlePanGesture:)];
-    
     [self.view addGestureRecognizer:panGesture];
+    
+    [self animateViewsForReset];
+}
 
+- (NSLayoutConstraint *)constraintForView:(CardPosition)position
+{
+    return [_dictCardView objectForKey:[NSNumber numberWithInt:position]];
 }
 
 - (void)handlePanGesture:(UIPanGestureRecognizer *)recognizer
@@ -50,155 +68,99 @@
     {
         CGFloat diff = _startValue - loc.y;
         _startValue = loc.y;
-        
-        NSLog(@"diff %f" , diff);
-        
-        if (diff < 1)
-        {
-            if (_currentFrontView == _viewFront)
-            {
-                _constTopViewTop.constant -= diff;
-            }
-            else if (_currentFrontView == _viewBack)
-            {
-                _constTopViewFront.constant -= diff;
-            }
-            else if (_currentFrontView == _viewTop)
-            {
-                _constTopViewBack.constant -= diff;
-            }
-        }
-        else
-        {
-            if (_currentFrontView == _viewFront)
-            {
-                _constTopViewFront.constant -= diff;
-            }
-            else if (_currentFrontView == _viewBack)
-            {
-                _constTopViewBack.constant -= diff;
-            }
-            else if (_currentFrontView == _viewTop)
-            {
-                _constTopViewTop.constant -= diff;
-            }
-        }
+        //        NSLog(@"diff %f" , diff);
+        [self constraintForView:(diff < 1) ? [_viewTop position] : [_viewFront position]].constant -= diff;
     }
     else if (recognizer.state == UIGestureRecognizerStateEnded)
     {
-        if (velocity.y > 100 )
+        if (velocity.y > SPEED_LIMIT )
         {
             //down slide
             NSLog(@"down slide");
-            if (_currentFrontView == _viewFront)
-            {
-                [self setTopViewInFront:NO];
-            }
-            else if (_currentFrontView == _viewBack)
-            {
-                [self setFrontViewInFront:NO];
-            }
-            else if (_currentFrontView == _viewTop)
-            {
-                [self setBackViewInFront:NO];
-            }
+            [self animateViewsForSlide:NO];
         }
-        else if (velocity.y <= 100 && velocity.y >= -100)
+        else if (velocity.y <= SPEED_LIMIT & velocity.y >= -SPEED_LIMIT)
         {
-            //down release
-            NSLog(@"down release");
-            
-            if (_currentFrontView == _viewFront)
-            {
-                [self setFrontViewInFront:NO];
-            }
-            else if (_currentFrontView == _viewBack)
-            {
-                [self setBackViewInFront:NO];
-            }
-            else if (_currentFrontView == _viewTop)
-            {
-                [self setTopViewInFront:NO];
-            }
+            [self animateViewsForReset];
         }
-        else if (velocity.y < -100)
+        else if (velocity.y < -SPEED_LIMIT)
         {
             //up
             NSLog(@"up slide");
             
-            if (_currentFrontView == _viewFront)
-            {
-                [self setBackViewInFront:YES];
-            }
-            else if (_currentFrontView == _viewBack)
-            {
-                [self setTopViewInFront:YES];
-            }
-            else if (_currentFrontView == _viewTop)
-            {
-                [self setFrontViewInFront:YES];
-            }
+            [self animateViewsForSlide:YES];
+            
         }
     }
 }
 
-- (void)setFrontViewInFront:(BOOL)slideUp
+- (void)animateViewsForSlide:(BOOL)slideUp
 {
-    NSLog(@"setFrontViewInFront");
-
-    if (slideUp) [self.view sendSubviewToBack:_viewBack];
-
-    _constTopViewBack.constant = 10;
-    _constTopViewFront.constant = 10;
-    _constTopViewTop.constant = -(_viewTop.frame.size.height + 20);
+    if (slideUp)
+    {
+        [self.view sendSubviewToBack:_viewTop];
+        [self.view bringSubviewToFront:_viewFront];
+        [self constraintForView:[_viewBack position]].constant = 10;
+        [self constraintForView:[_viewFront position]].constant = -(_viewFront.frame.size.height + 20);
+        [self constraintForView:[_viewTop position]].constant = 10;
+    }
+    else
+    {
+        [self.view bringSubviewToFront:_viewTop];
+        [self.view sendSubviewToBack:_viewBack];
+        [self constraintForView:[_viewBack position]].constant = -(_viewBack.frame.size.height + 20);
+        [self constraintForView:[_viewFront position]].constant = 10;
+        [self constraintForView:[_viewTop position]].constant = 10;
+    }
     
-    [UIView animateWithDuration:0.5
+    [UIView animateWithDuration:ANIMATION_DURATION
                      animations:^{
                          [self.view layoutIfNeeded];
                      } completion:^(BOOL finished) {
+                         
+                         CardView *viewTop = _viewTop;
+                         CardView *viewFront = _viewFront;
+                         CardView *viewBack = _viewBack;
+
+                         if (slideUp)
+                         {
+                             _viewTop = viewFront;
+                             _viewTop.tag = viewFront.tag;
+                             _viewFront = viewBack;
+                             _viewFront.tag = viewBack.tag;
+                             _viewBack = viewTop;
+                             _viewBack.tag = viewTop.tag;
+                         }
+                         else
+                         {
+                             _viewTop = viewBack;
+                             _viewTop.tag = viewBack.tag;
+                             _viewFront = viewTop;
+                             _viewFront.tag = viewTop.tag;
+                             _viewBack = viewFront;
+                             _viewBack.tag = viewFront.tag;
+                         }
+                         
                          [self.view bringSubviewToFront:_viewTop];
-                     }];
-    _currentFrontView = _viewFront;
-}
-
-- (void)setTopViewInFront:(BOOL)slideUp
-{
-        NSLog(@"setTopViewInFront");
-
-    if (slideUp) [self.view sendSubviewToBack:_viewFront];
-
-    _constTopViewBack.constant = -(_viewBack.frame.size.height + 20);
-    _constTopViewFront.constant = 10;
-    _constTopViewTop.constant = 10;
-
-    [UIView animateWithDuration:0.5
-                     animations:^{
-                         [self.view layoutIfNeeded];
-                     } completion:^(BOOL finished) {
-                         [self.view bringSubviewToFront:_viewBack];
+                         [self.view sendSubviewToBack:_viewBack];
                          
+                         NSLog(@"2top     = %d -> %d", viewTop.tag, _viewTop.tag);
+                         NSLog(@"2front   = %d -> %d", viewFront.tag, _viewFront.tag);
+                         NSLog(@"2back    = %d -> %d", viewBack.tag, _viewBack.tag);
+
                      }];
-    _currentFrontView = _viewTop;
 }
 
-- (void)setBackViewInFront:(BOOL)slideUp
+- (void)animateViewsForReset
 {
-        NSLog(@"setBackViewInFront");
-
-    if (slideUp) [self.view sendSubviewToBack:_viewTop];
+    [self constraintForView:[_viewBack position]].constant = 10;
+    [self constraintForView:[_viewFront position]].constant = 10;
+    [self constraintForView:[_viewTop position]].constant = -(_viewFront.frame.size.height + 20);
     
-    _constTopViewBack.constant = 10;
-    _constTopViewFront.constant = -(_viewFront.frame.size.height + 20);
-    _constTopViewTop.constant = 10;
-
-    [UIView animateWithDuration:0.5
+    [UIView animateWithDuration:ANIMATION_DURATION
                      animations:^{
                          [self.view layoutIfNeeded];
-                     } completion:^(BOOL finished) {
-                         [self.view bringSubviewToFront:_viewFront];
-                         
-                     }];
-    _currentFrontView = _viewBack;
+                     } completion:^(BOOL finished) {}];
 }
 
 @end
