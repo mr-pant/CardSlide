@@ -22,6 +22,7 @@
 @property (nonatomic) CardView                          *viewBack;
 @property (nonatomic) NSMutableDictionary               *dictCardView;
 @property (nonatomic) CGFloat startValue;
+@property (nonatomic) CGFloat startDiff;
 
 @end
 
@@ -47,7 +48,7 @@
     UIPanGestureRecognizer *panGesture = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(handlePanGesture:)];
     [self.view addGestureRecognizer:panGesture];
     
-    [self animateViewsForReset];
+    [self animateViewsForSlide:YES];
 }
 
 - (NSLayoutConstraint *)constraintForView:(CardPosition)position
@@ -60,36 +61,40 @@
     CGPoint loc = [recognizer locationInView:self.view];
     CGPoint velocity = [recognizer velocityInView:self.view];
     NSLog(@"velocity = %f", velocity.y);
+
     if (recognizer.state == UIGestureRecognizerStateBegan)
     {
         _startValue = loc.y;
+        _startDiff = -999;
+        return;
     }
-    else if (recognizer.state == UIGestureRecognizerStateChanged)
+    
+    if (recognizer.state == UIGestureRecognizerStateChanged)
     {
         CGFloat diff = _startValue - loc.y;
+        if (_startDiff == -999) _startDiff = diff;
+            
         _startValue = loc.y;
-        //        NSLog(@"diff %f" , diff);
-        [self constraintForView:(diff < 1) ? [_viewTop position] : [_viewFront position]].constant -= diff;
+                NSLog(@"diff %f" , diff);
+        [self constraintForView:(_startDiff < 1) ? [_viewTop position] : [_viewFront position]].constant -= diff;
+        return;
     }
-    else if (recognizer.state == UIGestureRecognizerStateEnded)
+    
+    if (recognizer.state == UIGestureRecognizerStateEnded)
     {
         if (velocity.y > SPEED_LIMIT )
         {
-            //down slide
             NSLog(@"down slide");
             [self animateViewsForSlide:NO];
         }
-        else if (velocity.y <= SPEED_LIMIT & velocity.y >= -SPEED_LIMIT)
+        else if (velocity.y <= SPEED_LIMIT && velocity.y >= -SPEED_LIMIT)
         {
             [self animateViewsForReset];
         }
         else if (velocity.y < -SPEED_LIMIT)
         {
-            //up
             NSLog(@"up slide");
-            
             [self animateViewsForSlide:YES];
-            
         }
     }
 }
@@ -160,7 +165,7 @@
     [UIView animateWithDuration:ANIMATION_DURATION
                      animations:^{
                          [self.view layoutIfNeeded];
-                     } completion:^(BOOL finished) {}];
+                     }];
 }
 
 @end
