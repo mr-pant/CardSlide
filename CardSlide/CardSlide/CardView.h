@@ -8,14 +8,6 @@
 
 #import <UIKit/UIKit.h>
 
-typedef enum{
-    POSITION_TOP = 100,
-    POSITION_FRONT,
-    POSITION_BACK
-} CardPosition;
-
 @interface CardView : UIView
-
-@property (nonatomic) CardPosition position;
 
 @end
