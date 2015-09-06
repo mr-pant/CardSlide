@@ -21,17 +21,14 @@ typedef enum{
 
 @interface ViewController ()
 
-@property (weak, nonatomic) IBOutlet NSLayoutConstraint *constTopViewTop;
-@property (weak, nonatomic) IBOutlet NSLayoutConstraint *constTopViewBack;
-@property (weak, nonatomic) IBOutlet NSLayoutConstraint *constTopViewFront;
-@property (nonatomic) CardView                          *viewTop;
-@property (nonatomic) CardView                          *viewFront;
-@property (nonatomic) CardView                          *viewBack;
-@property (nonatomic) NSMutableDictionary               *dictCardView;
-@property (nonatomic) CGFloat                           startValue;
-@property (nonatomic) CGFloat                           startDiff;
-@property (nonatomic) NSArray                           *pageData;
-@property (nonatomic) int                               pageIndex;
+@property (nonatomic) CardView              *viewTop;
+@property (nonatomic) CardView              *viewFront;
+@property (nonatomic) CardView              *viewBack;
+@property (nonatomic) NSMutableDictionary   *dictCardView;
+@property (nonatomic) CGFloat               startValue;
+@property (nonatomic) CGFloat               startDiff;
+@property (nonatomic) NSArray               *pageData;
+@property (nonatomic) int                   pageIndex;
 
 @end
 
@@ -45,8 +42,8 @@ typedef enum{
     
     _dictCardView = [NSMutableDictionary dictionaryWithCapacity:3];
     _viewTop = [self addCardViewForPosition:POSITION_TOP color:[UIColor blueColor]];
-    _viewFront = [self addCardViewForPosition:POSITION_FRONT color:[UIColor greenColor]];
     _viewBack = [self addCardViewForPosition:POSITION_BACK color:[UIColor yellowColor]];
+    _viewFront = [self addCardViewForPosition:POSITION_FRONT color:[UIColor greenColor]];
 }
 
 - (CardView *)addCardViewForPosition:(CardPosition)position color:(UIColor *)color
@@ -84,7 +81,7 @@ typedef enum{
                                                           attribute:NSLayoutAttributeCenterX
                                                          multiplier:1.0
                                                            constant:0.0]];
-
+    
     NSLayoutConstraint *verticalConstraint = [NSLayoutConstraint constraintWithItem:cardView
                                                                           attribute:NSLayoutAttributeCenterY
                                                                           relatedBy:NSLayoutRelationEqual
@@ -104,11 +101,14 @@ typedef enum{
     UIPanGestureRecognizer *panGesture = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(handlePanGesture:)];
     [self.view addGestureRecognizer:panGesture];
     
-    [self animateViewsForSlide:YES];
-    
     NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
     _pageData = [[dateFormatter monthSymbols] copy];
     _pageIndex = 0;
+    
+    UILabel *lab = [[_viewFront subviews] firstObject];
+    [lab setText:_pageData[_pageIndex]];
+    lab = [[_viewBack subviews] firstObject];
+    [lab setText:_pageData[_pageIndex + 1]];
 }
 
 - (NSLayoutConstraint *)constraintForView:(CardPosition)position
@@ -120,7 +120,7 @@ typedef enum{
 {
     CGPoint loc = [recognizer locationInView:self.view];
     CGPoint velocity = [recognizer velocityInView:self.view];
-
+    
     if (recognizer.state == UIGestureRecognizerStateBegan)
     {
         _startValue = loc.y;
@@ -181,7 +181,7 @@ typedef enum{
         [self constraintForView:[_viewFront tag]].constant = CONST_SHOW;
         [self constraintForView:[_viewTop tag]].constant = CONST_SHOW;
     }
-
+    
     [UIView animateWithDuration:ANIMATION_DURATION
                      animations:^{
                          [self.view layoutIfNeeded];
@@ -190,7 +190,7 @@ typedef enum{
                          CardView *viewTop = _viewTop;
                          CardView *viewFront = _viewFront;
                          CardView *viewBack = _viewBack;
-
+                         
                          if (slideUp)
                          {
                              _pageIndex++;
@@ -228,15 +228,12 @@ typedef enum{
 {
     if ( _pageIndex <= 0 || _pageIndex >= _pageData.count-1) return;
     
-    NSLog(@"set for index %d", _pageIndex);
-    
-    if (slideUp) // update back view
+    if (slideUp)
     {
         UILabel *lab = [[_viewBack subviews] firstObject];
         [lab setText:_pageData[_pageIndex+1]];
-   
     }
-    else // update top view
+    else
     {
         UILabel *lab = [[_viewTop subviews] firstObject];
         [lab setText:_pageData[_pageIndex-1]];
