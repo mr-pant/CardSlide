@@ -29,6 +29,8 @@ typedef enum{
 @property (nonatomic) NSMutableDictionary               *dictCardView;
 @property (nonatomic) CGFloat                           startValue;
 @property (nonatomic) CGFloat                           startDiff;
+@property (nonatomic) NSArray                           *pageData;
+@property (nonatomic) int                               pageIndex;
 
 @end
 
@@ -51,6 +53,10 @@ typedef enum{
     [self.view addGestureRecognizer:panGesture];
     
     [self animateViewsForSlide:YES];
+    
+    NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
+    _pageData = [[dateFormatter monthSymbols] copy];
+    _pageIndex = 0;
 }
 
 - (NSLayoutConstraint *)constraintForView:(CardPosition)position
@@ -60,6 +66,7 @@ typedef enum{
 
 - (void)handlePanGesture:(UIPanGestureRecognizer *)recognizer
 {
+    NSLog( @"index= %d", _pageIndex);
     CGPoint loc = [recognizer locationInView:self.view];
     CGPoint velocity = [recognizer velocityInView:self.view];
     NSLog(@"velocity = %f", velocity.y);
@@ -78,13 +85,22 @@ typedef enum{
             
         _startValue = loc.y;
                 NSLog(@"diff %f" , diff);
-        [self constraintForView:(_startDiff < 1) ? [_viewTop tag] : [_viewFront tag]].constant -= diff;
+        
+        if (_startDiff < 0 && _pageIndex > 0)
+        {
+            [self constraintForView:[_viewTop tag]].constant -= diff;
+        }
+        else if (_startDiff > 0 && _pageIndex < _pageData.count-1)
+        {
+            [self constraintForView:[_viewFront tag]].constant -= diff;
+        }
+        
         return;
     }
     
     if (recognizer.state == UIGestureRecognizerStateEnded)
     {
-        if (velocity.y > VELOCITY_LIMIT )
+        if (velocity.y > VELOCITY_LIMIT && _pageIndex > 0)
         {
             NSLog(@"down slide");
             [self animateViewsForSlide:NO];
@@ -93,7 +109,7 @@ typedef enum{
         {
             [self animateViewsForReset];
         }
-        else if (velocity.y <-VELOCITY_LIMIT)
+        else if (velocity.y <-VELOCITY_LIMIT && _pageIndex < _pageData.count-1)
         {
             NSLog(@"up slide");
             [self animateViewsForSlide:YES];
@@ -131,12 +147,14 @@ typedef enum{
 
                          if (slideUp)
                          {
+                             _pageIndex++;
                              _viewTop = viewFront;
                              _viewFront = viewBack;
                              _viewBack = viewTop;
                          }
                          else
                          {
+                             _pageIndex--;
                              _viewTop = viewBack;
                              _viewFront = viewTop;
                              _viewBack = viewFront;
@@ -144,11 +162,14 @@ typedef enum{
                          
                          [self.view bringSubviewToFront:_viewTop];
                          [self.view sendSubviewToBack:_viewBack];
+                         [self setDataForCurrentIndex:slideUp];
+                         NSLog(@"new page index = %d", _pageIndex);
                      }];
 }
 
 - (void)animateViewsForReset
 {
+    NSLog(@"animateViewsForReset");
     [self constraintForView:[_viewBack tag]].constant = 10;
     [self constraintForView:[_viewFront tag]].constant = 10;
     [self constraintForView:[_viewTop tag]].constant = -(_viewFront.frame.size.height + 20);
@@ -157,6 +178,26 @@ typedef enum{
                      animations:^{
                          [self.view layoutIfNeeded];
                      }];
+}
+
+- (void)setDataForCurrentIndex:(BOOL)slideUp
+{
+    if ( _pageIndex <= 0 || _pageIndex >= _pageData.count-1) return;
+    
+    NSLog(@"set for index %d", _pageIndex);
+    
+    if (slideUp) // update back view
+    {
+        UILabel *lab = [[_viewBack subviews] firstObject];
+        [lab setText:_pageData[_pageIndex+1]];
+   
+    }
+    else // update top view
+    {
+        UILabel *lab = [[_viewTop subviews] firstObject];
+        [lab setText:_pageData[_pageIndex-1]];
+
+    }
 }
 
 @end
