@@ -2,8 +2,6 @@
 <document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="7706" systemVersion="14E46" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="vXZ-lx-hvc">
     <dependencies>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="7703"/>
-        <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
-        <capability name="Constraints with non-1.0 multipliers" minToolsVersion="5.1"/>
     </dependencies>
     <scenes>
         <!--View Controller-->
@@ -17,77 +15,8 @@
                     <view key="view" contentMode="scaleToFill" id="kh9-bI-dsS">
                         <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                        <subviews>
-                            <view tag="101" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="LZy-Mq-jTA" userLabel="viewFront" customClass="CardView">
-                                <rect key="frame" x="26" y="30" width="548" height="540"/>
-                                <subviews>
-                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="FRONT" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Ydq-bt-qcS">
-                                        <rect key="frame" x="245" y="260" width="57" height="21"/>
-                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                        <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
-                                        <nil key="highlightedColor"/>
-                                    </label>
-                                </subviews>
-                                <color key="backgroundColor" red="0.91104915299101041" green="0.44225814171340749" blue="1" alpha="1" colorSpace="calibratedRGB"/>
-                                <constraints>
-                                    <constraint firstAttribute="centerX" secondItem="Ydq-bt-qcS" secondAttribute="centerX" id="66t-d1-4X1"/>
-                                    <constraint firstAttribute="centerY" secondItem="Ydq-bt-qcS" secondAttribute="centerY" id="uSH-zi-RuI"/>
-                                </constraints>
-                            </view>
-                            <view tag="100" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="KC3-0M-3jk" userLabel="viewTop" customClass="CardView">
-                                <rect key="frame" x="26" y="30" width="548" height="540"/>
-                                <subviews>
-                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="TOP" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="3o3-bs-OYo">
-                                        <rect key="frame" x="257" y="260" width="34" height="21"/>
-                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                        <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
-                                        <nil key="highlightedColor"/>
-                                    </label>
-                                </subviews>
-                                <color key="backgroundColor" red="0.47556809936851441" green="1" blue="0.72199985884871298" alpha="1" colorSpace="calibratedRGB"/>
-                                <constraints>
-                                    <constraint firstAttribute="centerY" secondItem="3o3-bs-OYo" secondAttribute="centerY" id="ILr-A1-gyo"/>
-                                    <constraint firstAttribute="centerX" secondItem="3o3-bs-OYo" secondAttribute="centerX" id="NuG-7c-tRX"/>
-                                </constraints>
-                            </view>
-                            <view tag="102" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="am7-6w-FBy" userLabel="viewBack" customClass="CardView">
-                                <rect key="frame" x="26" y="30" width="548" height="540"/>
-                                <subviews>
-                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="BACK" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="T5j-lE-QnO">
-                                        <rect key="frame" x="251" y="259" width="47" height="21"/>
-                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                        <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
-                                        <nil key="highlightedColor"/>
-                                    </label>
-                                </subviews>
-                                <color key="backgroundColor" red="1" green="0.49729723095281797" blue="0.44009657834787519" alpha="1" colorSpace="calibratedRGB"/>
-                                <constraints>
-                                    <constraint firstAttribute="centerY" secondItem="T5j-lE-QnO" secondAttribute="centerY" id="DY7-yG-kAd"/>
-                                    <constraint firstAttribute="centerX" secondItem="T5j-lE-QnO" secondAttribute="centerX" id="Xaz-WG-k8X"/>
-                                </constraints>
-                            </view>
-                        </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
-                        <constraints>
-                            <constraint firstAttribute="trailingMargin" secondItem="am7-6w-FBy" secondAttribute="trailing" constant="10" id="2dX-GW-4Yw"/>
-                            <constraint firstItem="am7-6w-FBy" firstAttribute="top" secondItem="jyV-Pf-zRb" secondAttribute="bottom" constant="10" id="9My-jY-cbO"/>
-                            <constraint firstItem="LZy-Mq-jTA" firstAttribute="leading" secondItem="kh9-bI-dsS" secondAttribute="leadingMargin" constant="10" id="CLS-XG-G2h"/>
-                            <constraint firstItem="KC3-0M-3jk" firstAttribute="height" secondItem="am7-6w-FBy" secondAttribute="height" id="Kvz-7h-oiP"/>
-                            <constraint firstItem="am7-6w-FBy" firstAttribute="leading" secondItem="kh9-bI-dsS" secondAttribute="leadingMargin" constant="10" id="QcT-xj-xtd"/>
-                            <constraint firstAttribute="trailingMargin" secondItem="KC3-0M-3jk" secondAttribute="trailing" constant="10" id="bHF-Ta-ZMP"/>
-                            <constraint firstItem="KC3-0M-3jk" firstAttribute="leading" secondItem="kh9-bI-dsS" secondAttribute="leadingMargin" constant="10" id="bcP-J3-Ylt"/>
-                            <constraint firstAttribute="trailingMargin" secondItem="LZy-Mq-jTA" secondAttribute="trailing" constant="10" id="imu-TL-b5N"/>
-                            <constraint firstItem="LZy-Mq-jTA" firstAttribute="top" secondItem="jyV-Pf-zRb" secondAttribute="bottom" constant="10" id="kmF-O2-zrZ"/>
-                            <constraint firstItem="KC3-0M-3jk" firstAttribute="height" secondItem="LZy-Mq-jTA" secondAttribute="height" id="ryo-ZR-5bd"/>
-                            <constraint firstItem="KC3-0M-3jk" firstAttribute="top" secondItem="jyV-Pf-zRb" secondAttribute="bottom" constant="10" id="sDC-qm-yEa"/>
-                            <constraint firstItem="am7-6w-FBy" firstAttribute="height" secondItem="kh9-bI-dsS" secondAttribute="height" multiplier="0.9" id="yZX-w8-NS4"/>
-                        </constraints>
                     </view>
-                    <connections>
-                        <outlet property="constTopViewBack" destination="9My-jY-cbO" id="TXo-4K-UEV"/>
-                        <outlet property="constTopViewFront" destination="kmF-O2-zrZ" id="ltw-Na-SCd"/>
-                        <outlet property="constTopViewTop" destination="sDC-qm-yEa" id="qvu-LD-2Kd"/>
-                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="x5A-6p-PRh" sceneMemberID="firstResponder"/>
             </objects>

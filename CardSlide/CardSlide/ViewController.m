@@ -17,6 +17,7 @@ typedef enum{
 
 #define VELOCITY_LIMIT         170
 #define ANIMATION_DURATION     0.4
+#define CONST_SHOW             0
 
 @interface ViewController ()
 
@@ -36,18 +37,69 @@ typedef enum{
 
 @implementation ViewController
 
+- (void)loadView
+{
+    UIView *contentView = [[UIView alloc] init];
+    contentView.backgroundColor = [UIColor whiteColor];
+    self.view = contentView;
+    
+    _dictCardView = [NSMutableDictionary dictionaryWithCapacity:3];
+    _viewTop = [self addCardViewForPosition:POSITION_TOP color:[UIColor blueColor]];
+    _viewFront = [self addCardViewForPosition:POSITION_FRONT color:[UIColor greenColor]];
+    _viewBack = [self addCardViewForPosition:POSITION_BACK color:[UIColor yellowColor]];
+}
+
+- (CardView *)addCardViewForPosition:(CardPosition)position color:(UIColor *)color
+{
+    NSArray* nibViews = [[NSBundle mainBundle] loadNibNamed:@"CardView"
+                                                      owner:self
+                                                    options:nil];
+    
+    CardView *cardView = [nibViews firstObject];
+    [cardView setTranslatesAutoresizingMaskIntoConstraints:NO];
+    cardView.backgroundColor = color;
+    [cardView setTag:position];
+    [self.view addSubview:cardView];
+    
+    [self.view addConstraint:[NSLayoutConstraint constraintWithItem:cardView
+                                                          attribute:NSLayoutAttributeWidth
+                                                          relatedBy:NSLayoutRelationEqual
+                                                             toItem:self.view
+                                                          attribute:NSLayoutAttributeWidth
+                                                         multiplier:1
+                                                           constant:0]];
+    
+    [self.view addConstraint:[NSLayoutConstraint constraintWithItem:cardView
+                                                          attribute:NSLayoutAttributeHeight
+                                                          relatedBy:NSLayoutRelationEqual
+                                                             toItem:self.view
+                                                          attribute:NSLayoutAttributeHeight
+                                                         multiplier:1
+                                                           constant:0]];
+    
+    [self.view addConstraint:[NSLayoutConstraint constraintWithItem:cardView
+                                                          attribute:NSLayoutAttributeCenterX
+                                                          relatedBy:NSLayoutRelationEqual
+                                                             toItem:self.view
+                                                          attribute:NSLayoutAttributeCenterX
+                                                         multiplier:1.0
+                                                           constant:0.0]];
+
+    NSLayoutConstraint *verticalConstraint = [NSLayoutConstraint constraintWithItem:cardView
+                                                                          attribute:NSLayoutAttributeCenterY
+                                                                          relatedBy:NSLayoutRelationEqual
+                                                                             toItem:self.view
+                                                                          attribute:NSLayoutAttributeCenterY
+                                                                         multiplier:1.0
+                                                                           constant:CONST_SHOW];
+    [self.view addConstraint:verticalConstraint];
+    [_dictCardView setObject:verticalConstraint forKey:[NSNumber numberWithInt:position]];
+    return cardView;
+}
+
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-
-    _viewTop = (CardView *)[self.view viewWithTag:POSITION_TOP];
-    _viewFront = (CardView *)[self.view viewWithTag:POSITION_FRONT];
-    _viewBack = (CardView *)[self.view viewWithTag:POSITION_BACK];
-    
-    _dictCardView = [NSMutableDictionary dictionaryWithCapacity:3];
-    [_dictCardView setObject:_constTopViewTop forKey:[NSNumber numberWithInt:POSITION_TOP]];
-    [_dictCardView setObject:_constTopViewFront forKey:[NSNumber numberWithInt:POSITION_FRONT]];
-    [_dictCardView setObject:_constTopViewBack forKey:[NSNumber numberWithInt:POSITION_BACK]];
     
     UIPanGestureRecognizer *panGesture = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(handlePanGesture:)];
     [self.view addGestureRecognizer:panGesture];
@@ -66,10 +118,8 @@ typedef enum{
 
 - (void)handlePanGesture:(UIPanGestureRecognizer *)recognizer
 {
-    NSLog( @"index= %d", _pageIndex);
     CGPoint loc = [recognizer locationInView:self.view];
     CGPoint velocity = [recognizer velocityInView:self.view];
-    NSLog(@"velocity = %f", velocity.y);
 
     if (recognizer.state == UIGestureRecognizerStateBegan)
     {
@@ -82,9 +132,7 @@ typedef enum{
     {
         CGFloat diff = _startValue - loc.y;
         if (_startDiff == -999) _startDiff = diff;
-            
         _startValue = loc.y;
-                NSLog(@"diff %f" , diff);
         
         if (_startDiff < 0 && _pageIndex > 0)
         {
@@ -102,7 +150,6 @@ typedef enum{
     {
         if (velocity.y > VELOCITY_LIMIT && _pageIndex > 0)
         {
-            NSLog(@"down slide");
             [self animateViewsForSlide:NO];
         }
         else if (velocity.y <= VELOCITY_LIMIT && velocity.y >= -VELOCITY_LIMIT)
@@ -111,7 +158,6 @@ typedef enum{
         }
         else if (velocity.y <-VELOCITY_LIMIT && _pageIndex < _pageData.count-1)
         {
-            NSLog(@"up slide");
             [self animateViewsForSlide:YES];
         }
     }
@@ -123,19 +169,19 @@ typedef enum{
     {
         [self.view sendSubviewToBack:_viewTop];
         [self.view bringSubviewToFront:_viewFront];
-        [self constraintForView:[_viewBack tag]].constant = 10;
-        [self constraintForView:[_viewFront tag]].constant = -(_viewFront.frame.size.height + 20);
-        [self constraintForView:[_viewTop tag]].constant = 10;
+        [self constraintForView:[_viewBack tag]].constant = CONST_SHOW;
+        [self constraintForView:[_viewFront tag]].constant = -(_viewFront.frame.size.height);
+        [self constraintForView:[_viewTop tag]].constant = CONST_SHOW;
     }
     else
     {
         [self.view bringSubviewToFront:_viewTop];
         [self.view sendSubviewToBack:_viewBack];
-        [self constraintForView:[_viewBack tag]].constant = -(_viewBack.frame.size.height + 20);
-        [self constraintForView:[_viewFront tag]].constant = 10;
-        [self constraintForView:[_viewTop tag]].constant = 10;
+        [self constraintForView:[_viewBack tag]].constant = -(_viewBack.frame.size.height);
+        [self constraintForView:[_viewFront tag]].constant = CONST_SHOW;
+        [self constraintForView:[_viewTop tag]].constant = CONST_SHOW;
     }
-    
+
     [UIView animateWithDuration:ANIMATION_DURATION
                      animations:^{
                          [self.view layoutIfNeeded];
@@ -163,16 +209,14 @@ typedef enum{
                          [self.view bringSubviewToFront:_viewTop];
                          [self.view sendSubviewToBack:_viewBack];
                          [self setDataForCurrentIndex:slideUp];
-                         NSLog(@"new page index = %d", _pageIndex);
                      }];
 }
 
 - (void)animateViewsForReset
 {
-    NSLog(@"animateViewsForReset");
-    [self constraintForView:[_viewBack tag]].constant = 10;
-    [self constraintForView:[_viewFront tag]].constant = 10;
-    [self constraintForView:[_viewTop tag]].constant = -(_viewFront.frame.size.height + 20);
+    [self constraintForView:[_viewBack tag]].constant = CONST_SHOW;
+    [self constraintForView:[_viewFront tag]].constant = CONST_SHOW;
+    [self constraintForView:[_viewTop tag]].constant = -(_viewFront.frame.size.height);
     
     [UIView animateWithDuration:ANIMATION_DURATION
                      animations:^{
@@ -196,7 +240,6 @@ typedef enum{
     {
         UILabel *lab = [[_viewTop subviews] firstObject];
         [lab setText:_pageData[_pageIndex-1]];
-
     }
 }
 

@@ -15,6 +15,7 @@
 		D257A3041B98A9EB003F1E43 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = D257A3021B98A9EB003F1E43 /* LaunchScreen.xib */; };
 		D257A3101B98A9EB003F1E43 /* CardSlideTests.m in Sources */ = {isa = PBXBuildFile; fileRef = D257A30F1B98A9EB003F1E43 /* CardSlideTests.m */; };
 		D257A31C1B98AA76003F1E43 /* CardView.m in Sources */ = {isa = PBXBuildFile; fileRef = D257A31B1B98AA76003F1E43 /* CardView.m */; };
+		D2D0939F1B9C73D100B56937 /* CardView.xib in Resources */ = {isa = PBXBuildFile; fileRef = D2D0939E1B9C73D100B56937 /* CardView.xib */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -43,6 +44,7 @@
 		D257A30F1B98A9EB003F1E43 /* CardSlideTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CardSlideTests.m; sourceTree = "<group>"; };
 		D257A31A1B98AA76003F1E43 /* CardView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CardView.h; sourceTree = "<group>"; };
 		D257A31B1B98AA76003F1E43 /* CardView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CardView.m; sourceTree = "<group>"; };
+		D2D0939E1B9C73D100B56937 /* CardView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = CardView.xib; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -128,6 +130,7 @@
 			children = (
 				D257A31A1B98AA76003F1E43 /* CardView.h */,
 				D257A31B1B98AA76003F1E43 /* CardView.m */,
+				D2D0939E1B9C73D100B56937 /* CardView.xib */,
 			);
 			name = View;
 			sourceTree = "<group>";
@@ -214,6 +217,7 @@
 			files = (
 				D257A2FF1B98A9EB003F1E43 /* Main.storyboard in Resources */,
 				D257A3041B98A9EB003F1E43 /* LaunchScreen.xib in Resources */,
+				D2D0939F1B9C73D100B56937 /* CardView.xib in Resources */,
 				D257A3011B98A9EB003F1E43 /* Images.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -430,6 +434,7 @@
 				D257A3151B98A9EB003F1E43 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		D257A3161B98A9EB003F1E43 /* Build configuration list for PBXNativeTarget "CardSlideTests" */ = {
 			isa = XCConfigurationList;
@@ -438,6 +443,7 @@
 				D257A3181B98A9EB003F1E43 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
