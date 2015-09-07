@@ -18,6 +18,7 @@ typedef enum{
 #define VELOCITY_LIMIT         170
 #define ANIMATION_DURATION     0.4
 #define CONST_SHOW             0
+#define BORDER_PADDING         50
 
 @interface ViewController ()
 
@@ -64,7 +65,7 @@ typedef enum{
                                                              toItem:self.view
                                                           attribute:NSLayoutAttributeWidth
                                                          multiplier:1
-                                                           constant:0]];
+                                                           constant:-BORDER_PADDING]];
     
     [self.view addConstraint:[NSLayoutConstraint constraintWithItem:cardView
                                                           attribute:NSLayoutAttributeHeight
@@ -72,7 +73,7 @@ typedef enum{
                                                              toItem:self.view
                                                           attribute:NSLayoutAttributeHeight
                                                          multiplier:1
-                                                           constant:0]];
+                                                           constant:-BORDER_PADDING]];
     
     [self.view addConstraint:[NSLayoutConstraint constraintWithItem:cardView
                                                           attribute:NSLayoutAttributeCenterX
@@ -154,7 +155,7 @@ typedef enum{
         }
         else if (velocity.y <= VELOCITY_LIMIT && velocity.y >= -VELOCITY_LIMIT)
         {
-            [self animateViewsForReset];
+            [self moveViewsForReset:YES];
         }
         else if (velocity.y <-VELOCITY_LIMIT && _pageIndex < _pageData.count-1)
         {
@@ -168,16 +169,18 @@ typedef enum{
     if (slideUp)
     {
         [self.view sendSubviewToBack:_viewTop];
+        [_viewTop setHidden:YES];
         [self.view bringSubviewToFront:_viewFront];
         [self constraintForView:[_viewBack tag]].constant = CONST_SHOW;
-        [self constraintForView:[_viewFront tag]].constant = -(_viewFront.frame.size.height);
+        [self constraintForView:[_viewFront tag]].constant = -(_viewFront.frame.size.height + BORDER_PADDING);
         [self constraintForView:[_viewTop tag]].constant = CONST_SHOW;
     }
     else
     {
         [self.view bringSubviewToFront:_viewTop];
+        [_viewBack setHidden:YES];
         [self.view sendSubviewToBack:_viewBack];
-        [self constraintForView:[_viewBack tag]].constant = -(_viewBack.frame.size.height);
+        [self constraintForView:[_viewBack tag]].constant = -(_viewBack.frame.size.height + BORDER_PADDING);
         [self constraintForView:[_viewFront tag]].constant = CONST_SHOW;
         [self constraintForView:[_viewTop tag]].constant = CONST_SHOW;
     }
@@ -193,6 +196,7 @@ typedef enum{
                          
                          if (slideUp)
                          {
+                             [_viewTop setHidden:NO];
                              _pageIndex++;
                              _viewTop = viewFront;
                              _viewFront = viewBack;
@@ -200,6 +204,7 @@ typedef enum{
                          }
                          else
                          {
+                             [_viewBack setHidden:NO];
                              _pageIndex--;
                              _viewTop = viewBack;
                              _viewFront = viewTop;
@@ -212,13 +217,13 @@ typedef enum{
                      }];
 }
 
-- (void)animateViewsForReset
+- (void)moveViewsForReset:(BOOL)animate
 {
     [self constraintForView:[_viewBack tag]].constant = CONST_SHOW;
     [self constraintForView:[_viewFront tag]].constant = CONST_SHOW;
-    [self constraintForView:[_viewTop tag]].constant = -(_viewFront.frame.size.height);
+    [self constraintForView:[_viewTop tag]].constant = -(_viewFront.frame.size.height + BORDER_PADDING);
     
-    [UIView animateWithDuration:ANIMATION_DURATION
+    [UIView animateWithDuration:animate ? ANIMATION_DURATION : 0
                      animations:^{
                          [self.view layoutIfNeeded];
                      }];
@@ -226,7 +231,10 @@ typedef enum{
 
 - (void)setDataForCurrentIndex:(BOOL)slideUp
 {
-    if ( _pageIndex <= 0 || _pageIndex >= _pageData.count-1) return;
+    if ( _pageIndex <= 0 || _pageIndex >= _pageData.count-1)
+    {
+        return;
+    }
     
     if (slideUp)
     {
@@ -238,6 +246,17 @@ typedef enum{
         UILabel *lab = [[_viewTop subviews] firstObject];
         [lab setText:_pageData[_pageIndex-1]];
     }
+}
+
+- (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator
+{
+    [coordinator animateAlongsideTransition:^(id<UIViewControllerTransitionCoordinatorContext> context)
+     {
+     } completion:^(id<UIViewControllerTransitionCoordinatorContext> context)
+     {
+         [self moveViewsForReset:NO];
+     }];
+    [super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
 }
 
 @end

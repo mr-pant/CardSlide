@@ -10,12 +10,10 @@
 
 @implementation CardView
 
-/*
-// Only override drawRect: if you perform custom drawing.
-// An empty implementation adversely affects performance during animation.
-- (void)drawRect:(CGRect)rect {
-    // Drawing code
+- (void)awakeFromNib
+{
+    self.layer.cornerRadius = 20;
+    self.layer.masksToBounds = YES;
 }
-*/
 
 @end
