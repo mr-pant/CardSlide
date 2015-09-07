@@ -252,9 +252,11 @@ typedef enum{
 {
     [coordinator animateAlongsideTransition:^(id<UIViewControllerTransitionCoordinatorContext> context)
      {
+         [_viewTop setHidden:YES];
      } completion:^(id<UIViewControllerTransitionCoordinatorContext> context)
      {
          [self moveViewsForReset:NO];
+         [_viewTop setHidden:NO];
      }];
     [super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
 }
