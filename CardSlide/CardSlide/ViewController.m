@@ -15,6 +15,24 @@ typedef enum{
     POSITION_BACK
 } CardPosition;
 
+typedef enum {
+    
+    NO_VIEW_SLIDING,
+    TOP_VIEW_SLIDE_DOWN,
+    TOP_VIEW_SLIDE_UP,
+    FRONT_VIEW_SLIDE_DOWN,
+    FRONT_VIEW_SLIDE_UP
+
+} SwipeViewSlideDirection;
+
+typedef enum {
+
+    NO_SWIPE,
+    SWIPE_UP,
+    SWIPE_DOWN
+    
+} SwipeDirection;
+
 #define VELOCITY_LIMIT         170
 #define ANIMATION_DURATION     0.4
 #define CONST_SHOW             0
@@ -22,14 +40,16 @@ typedef enum{
 
 @interface ViewController ()
 
-@property (nonatomic) CardView              *viewTop;
-@property (nonatomic) CardView              *viewFront;
-@property (nonatomic) CardView              *viewBack;
-@property (nonatomic) NSMutableDictionary   *dictCardView;
-@property (nonatomic) CGFloat               startValue;
-@property (nonatomic) CGFloat               startDiff;
-@property (nonatomic) NSArray               *pageData;
-@property (nonatomic) int                   pageIndex;
+@property (nonatomic) CardView                  *viewTop;
+@property (nonatomic) CardView                  *viewFront;
+@property (nonatomic) CardView                  *viewBack;
+@property (nonatomic) NSMutableDictionary       *dictCardView;
+@property (nonatomic) CGFloat                   startValue;
+@property (nonatomic) CGFloat                   startDiff;
+@property (nonatomic) NSArray                   *pageData;
+@property (nonatomic) int                       pageIndex;
+@property (nonatomic) SwipeViewSlideDirection   currentSwipeDirection;
+@property (nonatomic) SwipeDirection            initialSwipeDirection;
 
 @end
 
@@ -42,9 +62,12 @@ typedef enum{
     self.view = contentView;
     
     _dictCardView = [NSMutableDictionary dictionaryWithCapacity:3];
-    _viewTop = [self addCardViewForPosition:POSITION_TOP color:[UIColor blueColor]];
+    _viewTop = [self addCardViewForPosition:POSITION_TOP color:[UIColor cyanColor]];
     _viewBack = [self addCardViewForPosition:POSITION_BACK color:[UIColor yellowColor]];
     _viewFront = [self addCardViewForPosition:POSITION_FRONT color:[UIColor greenColor]];
+    
+    _currentSwipeDirection = NO_VIEW_SLIDING;
+    _initialSwipeDirection = NO_SWIPE;
 }
 
 - (CardView *)addCardViewForPosition:(CardPosition)position color:(UIColor *)color
@@ -125,33 +148,43 @@ typedef enum{
     if (recognizer.state == UIGestureRecognizerStateBegan)
     {
         _startValue = loc.y;
-        _startDiff = -999;
+        _initialSwipeDirection = NO_SWIPE;
         return;
     }
     
     if (recognizer.state == UIGestureRecognizerStateChanged)
     {
         CGFloat diff = _startValue - loc.y;
-        if (_startDiff == -999) _startDiff = diff;
         _startValue = loc.y;
         
-        if (_startDiff < 0 && _pageIndex > 0)
+        if (_initialSwipeDirection == NO_SWIPE)
+            _initialSwipeDirection = diff < 0 ? SWIPE_DOWN : SWIPE_UP;
+        
+        if (_initialSwipeDirection == SWIPE_DOWN && _pageIndex > 0)
         {
+            _currentSwipeDirection = diff < 0 ? TOP_VIEW_SLIDE_DOWN : TOP_VIEW_SLIDE_UP;
             [self constraintForView:[_viewTop tag]].constant -= diff;
         }
-        else if (_startDiff > 0 && _pageIndex < _pageData.count-1)
+        else if (_initialSwipeDirection == SWIPE_UP && _pageIndex < _pageData.count-1)
         {
-            [self constraintForView:[_viewFront tag]].constant -= diff;
+            _currentSwipeDirection = diff < 0 ? FRONT_VIEW_SLIDE_DOWN : FRONT_VIEW_SLIDE_UP;
+            CGFloat constraint = [self constraintForView:[_viewFront tag]].constant;
+            constraint -= diff;
+
+            if (constraint < 0)
+                [self constraintForView:[_viewFront tag]].constant -= diff;
         }
-        
         return;
     }
     
-    if (recognizer.state == UIGestureRecognizerStateEnded)
+    if (recognizer.state == UIGestureRecognizerStateEnded || recognizer.state == UIGestureRecognizerStateCancelled)
     {
         if (velocity.y > VELOCITY_LIMIT && _pageIndex > 0)
         {
-            [self animateViewsForSlide:NO];
+            if (_currentSwipeDirection == FRONT_VIEW_SLIDE_DOWN)
+                [self moveViewsForReset:YES];
+            else
+                [self animateViewsForSlide:NO];
         }
         else if (velocity.y <= VELOCITY_LIMIT && velocity.y >= -VELOCITY_LIMIT)
         {
@@ -159,7 +192,10 @@ typedef enum{
         }
         else if (velocity.y <-VELOCITY_LIMIT && _pageIndex < _pageData.count-1)
         {
-            [self animateViewsForSlide:YES];
+            if (_currentSwipeDirection == TOP_VIEW_SLIDE_UP)
+                [self moveViewsForReset:YES];
+            else
+                [self animateViewsForSlide:YES];
         }
     }
 }
