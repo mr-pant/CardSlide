@@ -1,13 +1,11 @@
 # CardSlide
 
-![demo1](ScreenShots/CardSlide_SwipeDown.gif) 
 ##Swipe Down
-
+![demo1](ScreenShots/CardSlide_SwipeDown.gif) 
 ***
 
-![demo2](ScreenShots/CardSlide_SwipeUp.gif)
 ##Swipe Up
-
+![demo2](ScreenShots/CardSlide_SwipeUp.gif)
 ***
 
 Using this?
