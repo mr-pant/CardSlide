@@ -9,34 +9,39 @@
 #import "ViewController.h"
 #import "CardView.h"
 
-typedef enum{
+//--------------------------------------------------------------------------------------------------------------------------------
+
+typedef enum
+{
     POSITION_TOP = 100,
     POSITION_FRONT,
     POSITION_BACK
 } CardPosition;
 
-typedef enum {
-    
+typedef enum
+{
     NO_VIEW_SLIDING,
     TOP_VIEW_SLIDE_DOWN,
     TOP_VIEW_SLIDE_UP,
     FRONT_VIEW_SLIDE_DOWN,
     FRONT_VIEW_SLIDE_UP
-
 } SwipeViewSlideDirection;
 
-typedef enum {
-
+typedef enum
+{
     NO_SWIPE,
     SWIPE_UP,
     SWIPE_DOWN
-    
 } SwipeDirection;
 
-#define VELOCITY_LIMIT         170
-#define ANIMATION_DURATION     0.4
-#define CONST_SHOW             0
-#define BORDER_PADDING         50
+//--------------------------------------------------------------------------------------------------------------------------------
+
+#define VELOCITY_LIMIT                          170
+#define ANIMATION_DURATION                      0.4
+#define CONST_SHOW                              0
+#define BORDER_PADDING                          50
+
+//--------------------------------------------------------------------------------------------------------------------------------
 
 @interface ViewController ()
 
@@ -45,13 +50,14 @@ typedef enum {
 @property (nonatomic) CardView                  *viewBack;
 @property (nonatomic) NSMutableDictionary       *dictCardView;
 @property (nonatomic) CGFloat                   startValue;
-@property (nonatomic) CGFloat                   startDiff;
-@property (nonatomic) NSArray                   *pageData;
+@property (nonatomic) NSArray                   *arrPageData;
 @property (nonatomic) int                       pageIndex;
 @property (nonatomic) SwipeViewSlideDirection   currentSwipeDirection;
 @property (nonatomic) SwipeDirection            initialSwipeDirection;
 
 @end
+
+//--------------------------------------------------------------------------------------------------------------------------------
 
 @implementation ViewController
 
@@ -122,23 +128,18 @@ typedef enum {
 {
     [super viewDidLoad];
     
-    UIPanGestureRecognizer *panGesture = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(handlePanGesture:)];
-    [self.view addGestureRecognizer:panGesture];
+    [self.view addGestureRecognizer:[[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(handlePanGesture:)]];
     
-    NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
-    _pageData = [[dateFormatter monthSymbols] copy];
+    _arrPageData = [[[[NSDateFormatter alloc] init] monthSymbols] copy];
     _pageIndex = 0;
     
-    UILabel *lab = [[_viewFront subviews] firstObject];
-    [lab setText:_pageData[_pageIndex]];
-    lab = [[_viewBack subviews] firstObject];
-    [lab setText:_pageData[_pageIndex + 1]];
+    [self setDataInView:_viewFront forIndex:_pageIndex];
+    [self setDataInView:_viewBack forIndex:_pageIndex+1];
 }
 
-- (NSLayoutConstraint *)constraintForView:(CardPosition)position
-{
-    return [_dictCardView objectForKey:[NSNumber numberWithInt:position]];
-}
+//--------------------------------------------------------------------------------------------------------------------------------
+
+#pragma mark CardView Animation
 
 - (void)handlePanGesture:(UIPanGestureRecognizer *)recognizer
 {
@@ -165,14 +166,13 @@ typedef enum {
             _currentSwipeDirection = diff < 0 ? TOP_VIEW_SLIDE_DOWN : TOP_VIEW_SLIDE_UP;
             [self constraintForView:[_viewTop tag]].constant -= diff;
         }
-        else if (_initialSwipeDirection == SWIPE_UP && _pageIndex < _pageData.count-1)
+        else if (_initialSwipeDirection == SWIPE_UP && _pageIndex < _arrPageData.count-1)
         {
             _currentSwipeDirection = diff < 0 ? FRONT_VIEW_SLIDE_DOWN : FRONT_VIEW_SLIDE_UP;
             CGFloat constraint = [self constraintForView:[_viewFront tag]].constant;
             constraint -= diff;
-
-            if (constraint < 0)
-                [self constraintForView:[_viewFront tag]].constant -= diff;
+            
+            if (constraint < 0) [self constraintForView:[_viewFront tag]].constant -= diff;
         }
         return;
     }
@@ -190,7 +190,7 @@ typedef enum {
         {
             [self moveViewsForReset:YES];
         }
-        else if (velocity.y <-VELOCITY_LIMIT && _pageIndex < _pageData.count-1)
+        else if (velocity.y <-VELOCITY_LIMIT && _pageIndex < _arrPageData.count-1)
         {
             if (_currentSwipeDirection == TOP_VIEW_SLIDE_UP)
                 [self moveViewsForReset:YES];
@@ -265,25 +265,6 @@ typedef enum {
                      }];
 }
 
-- (void)setDataForCurrentIndex:(BOOL)slideUp
-{
-    if ( _pageIndex <= 0 || _pageIndex >= _pageData.count-1)
-    {
-        return;
-    }
-    
-    if (slideUp)
-    {
-        UILabel *lab = [[_viewBack subviews] firstObject];
-        [lab setText:_pageData[_pageIndex+1]];
-    }
-    else
-    {
-        UILabel *lab = [[_viewTop subviews] firstObject];
-        [lab setText:_pageData[_pageIndex-1]];
-    }
-}
-
 - (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator
 {
     [coordinator animateAlongsideTransition:^(id<UIViewControllerTransitionCoordinatorContext> context)
@@ -296,5 +277,32 @@ typedef enum {
      }];
     [super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
 }
+
+- (NSLayoutConstraint *)constraintForView:(CardPosition)position
+{
+    return [_dictCardView objectForKey:[NSNumber numberWithInt:position]];
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+#pragma mark Data Handling
+
+- (void)setDataForCurrentIndex:(BOOL)slideUp
+{
+    if ( _pageIndex <= 0 || _pageIndex >= _arrPageData.count-1) return;
+    
+    if (slideUp)
+        [self setDataInView:_viewBack forIndex:_pageIndex+1];
+    else
+        [self setDataInView:_viewTop forIndex:_pageIndex-1];
+}
+
+- (void)setDataInView:(CardView *)cardView forIndex:(int)index
+{
+    UILabel *lab = [[cardView subviews] firstObject];
+    [lab setText:_arrPageData[index]];
+    NSLog(@"Data set for index %d", index);
+}
+
 
 @end
