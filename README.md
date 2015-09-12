@@ -8,6 +8,23 @@
 ![demo2](ScreenShots/CardSlide_SwipeUp.gif)
 ***
 
+Features
+==================
+- Simple swipe up and swipe down just like sliding a card to change the views.
+- Max 3 views loaded at a time.
+- 1 view loads on a single slide.
+- Works on Autolayout!
+- Seperate [`CardView.xib`](CardSlide/CardSlide/CardView.xib) for designing your UI in it. Just plug and play!
+
+Usage
+==================
+- Include the following in your project:
+  CardView.h, CardView.m, CardView.xib, ViewController.h & ViewController.m
+- Use CardView class to design your UI.
+- ViewController class handles the loading of CardView.
+- Keep your data in _arrPageData in viewDidLoad.
+- Set your data into CardView in setDataInView:forIndex method.
+
 Using this?
 ==================
 Kindly let me know! 
